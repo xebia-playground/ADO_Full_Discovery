@@ -1,0 +1,37 @@
+reports/
+.env
+.env.*
+!.env.example
+
+# Local credentials and private key material
+.npmrc
+credentials.json
+credentials.*.json
+*.credentials
+*.pat
+*.token
+*.pem
+*.key
+*.p12
+*.pfx
+*.ppk
+id_rsa
+id_ed25519
+id_ecdsa
+
+# Temporary Git authentication scripts
+askpass.sh
+git-askpass*.sh
+.git-askpass*
+
+# Local test and generated artifacts
+*.log
+node_modules/
+dist/
+coverage/
+.nyc_output/
+test-results/
+gitbridge-test-*/
+gitbridge-empty-test-*/
+gitbridge-reject-test-*/
+gitbridge-push-auth-test-*/

@@ -1,0 +1,11 @@
+{
+  "name": "ado-full-discovery",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/cli.mjs && node --check src/ado/client.mjs && node --check src/lib/report.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

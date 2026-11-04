@@ -1,0 +1,73 @@
+name: 01 - ADO Full Discovery (Organization + Selected Projects)
+on:
+  workflow_call:
+    inputs:
+      ado_org_url:
+        description: Azure DevOps organization URL, e.g. https://dev.azure.com/contoso
+        required: true
+        type: string
+      ado_project:
+        description: Single ADO project (leave blank to discover all)
+        required: false
+        type: string
+      ado_projects:
+        description: Comma-separated project names (leave blank to discover all)
+        required: false
+        type: string
+      toolkit_ref:
+        description: Branch, tag or commit to use for the toolkit source
+        required: false
+        type: string
+        default: main
+    secrets:
+      ADO_PAT:
+        description: Azure DevOps personal access token with read access
+        required: true
+      TOOLKIT_READ_TOKEN:
+        description: Optional GitHub token for checking out a private toolkit repository
+        required: false
+  workflow_dispatch:
+    inputs:
+      ado_org_url:
+        description: Azure DevOps organization URL, e.g. https://dev.azure.com/contoso
+        required: true
+        type: string
+      ado_project:
+        description: Single ADO project (legacy input; leave blank to discover all)
+        required: false
+        type: string
+      ado_projects:
+        description: Comma-separated project names (leave both project inputs blank to discover all accessible projects)
+        required: false
+        type: string
+permissions:
+  contents: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: xebia-playground/ADO_Full_Discovery
+          ref: ${{ inputs.toolkit_ref || github.ref_name }}
+          token: ${{ secrets.TOOLKIT_READ_TOKEN || github.token }}
+          path: gitbridge-toolkit
+          persist-credentials: false
+      - name: Discover organization, projects and repositories
+        env:
+          ADO_PAT: ${{ secrets.ADO_PAT }}
+          ADO_ORG_URL: ${{ inputs.ado_org_url }}
+          ADO_PROJECT: ${{ inputs.ado_project }}
+          ADO_PROJECTS: ${{ inputs.ado_projects }}
+        run: node gitbridge-toolkit/src/cli.mjs discover
+      - name: Upload ADO inventory package
+        if: always()
+        # actions/upload-artifact v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: ado-discovery-${{ github.run_number }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 30
